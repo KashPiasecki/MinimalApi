@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MinimalApi.Configuration;
 using MinimalApi.Data;
+using MinimalApi.Extensions;
 
 //Builder & Services
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,8 @@ services.AddSingleton(minimalApiConfiguration.SqlConfiguration);
 services.AddDbContext<AppDataContext>(options =>
     options.UseSqlServer(minimalApiConfiguration.SqlConfiguration.ConnectionString));
 
-//App 
+//WebApplication 
 var app = builder.Build();
+app.UseAutomaticMigration();
 app.UseHttpsRedirection();
 app.Run();
