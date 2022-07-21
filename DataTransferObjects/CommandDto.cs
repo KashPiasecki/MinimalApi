@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MinimalApi.Dtos;
+namespace MinimalApi.DataTransferObjects;
 
-public class InsertCommandDto
+public record CommandDto
 {
     [Required]
     public string? HowTo { get; set; }

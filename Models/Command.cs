@@ -3,24 +3,19 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MinimalApi.Models;
 
-public class Command
+public record Command(int Id, string? HowTo, string? Platform, string? CommandLine)
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public int Id { get; set; } = Id;
+
     [Required]
-    public string? HowTo { get; set; }
+    public string? HowTo { get; set; } = HowTo;
+
     [Required]
     [MaxLength(5)]
-    public string? Platform { get; set; }
-    [Required]
-    public string? CommandLine { get; set; }
+    public string? Platform { get; set; } = Platform;
 
-    public Command(int id, string? howTo, string? platform, string? commandLine)
-    {
-        Id = id;
-        HowTo = howTo;
-        Platform = platform;
-        CommandLine = commandLine;
-    }
+    [Required]
+    public string? CommandLine { get; set; } = CommandLine;
 }
