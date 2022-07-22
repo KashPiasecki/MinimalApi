@@ -1,9 +1,13 @@
+using System.Reflection;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MinimalApi.Configuration;
 using MinimalApi.Data;
 using MinimalApi.DataTransferObjects;
 using MinimalApi.Extensions;
 using MinimalApi.Repositories;
+using MinimalApi.Validation;
+using static Microsoft.AspNetCore.Http.Results;
 
 // WebApplicationBuilder
 var builder = WebApplication.CreateBuilder(args);
@@ -14,8 +18,9 @@ services.AddSingleton(minimalApiConfiguration.SqlConfiguration);
 services.AddScoped<ICommandRepository, CommandRepository>();
 services.AddDbContext<AppDataContext>(options =>
     options.UseSqlServer(minimalApiConfiguration.SqlConfiguration.ConnectionString));
+services.AddValidatorsFromAssembly(Assembly.GetAssembly(typeof(Program)));
 // WebApplication 
-var app = builder.Build();  
+var app = builder.Build();
 app.UseAutomaticDatabaseUpdate();
 app.UseHttpsRedirection();
 
@@ -25,22 +30,17 @@ app.MapGet("api/v1/commands", async (ICommandRepository repository) =>
 app.MapGet("api/v1/commands/{id:int}", async (ICommandRepository repository, int id) =>
 {
     var command = await repository.GetAsync(id);
-    return command.IsSomething() ? Results.Ok(command) : Results.NotFound();
-
+    return command.IsSomething() ? Ok(command) : NotFound();
 });
-app.MapPost("api/v1/commands", async (ICommandRepository repository, CommandDto command) =>
+app.MapPost("api/v1/commands", async (ICommandRepository repository, Validated<CommandDto> command) =>
 {
-    var created = await repository.AddAsync(command);
-    return Results.Created($"api/v1/commands/{created.Id}", created);
+    var (isValid, value) = command;
+    var created = await repository.AddAsync(value);
+    return isValid ? Created($"api/v1/commands/{created.Id}", created) : ValidationProblem(command.Errors);
 });
-    
 app.MapDelete("api/v1/commands/{id:int}", async (ICommandRepository repository, int id) =>
 {
     var result = await repository.DeleteAsync(id);
-    return result ? Results.NoContent() : Results.NotFound();
+    return result ? NoContent() : NotFound();
 });
 app.Run();
-
-public class ModelState
-{
-}

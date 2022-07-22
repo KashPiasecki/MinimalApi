@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 
 namespace MinimalApi.DataTransferObjects;
 
-public record CommandDto
+public record CommandDto 
 {
     [Required]
     public string? HowTo { get; init; }
@@ -11,4 +12,14 @@ public record CommandDto
     public string? Platform { get; init; }
     [Required]
     public string? CommandLine { get; init; }
+}
+
+public class CommandValidator : AbstractValidator<CommandDto>
+{
+    public CommandValidator()
+    {
+        RuleFor(m => m.HowTo).NotEmpty();
+        RuleFor(m => m.Platform).NotEmpty().MaximumLength(5);
+        RuleFor(m => m.CommandLine).NotEmpty();
+    }
 }
